@@ -1,0 +1,24 @@
+CREATE TABLE Feature (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+selectAll:
+SELECT key, value
+FROM Feature
+ORDER BY key ASC;
+
+selectByKey:
+SELECT key, value
+FROM Feature
+WHERE key = ?
+ORDER BY key ASC;
+
+insertOne:
+INSERT OR REPLACE
+INTO Feature
+VALUES ?;
+
+deleteAll:
+DELETE FROM
+Feature;
