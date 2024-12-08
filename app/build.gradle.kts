@@ -7,6 +7,7 @@ plugins {
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.spotless)
   alias(libs.plugins.detekt)
+  alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -45,6 +46,7 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.material)
 
+  implementation(libs.firebase.config)
   implementation(libs.sqldelight.android.driver)
   api(libs.sqldelight.coroutines)
 }
