@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "425870617899",
+    "project_id": "plexus-43f29",
+    "storage_bucket": "plexus-43f29.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:425870617899:android:88c65cbea438b1a0b6696e",
+        "android_client_info": {
+          "package_name": "ru.kode.plexus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYUOAPcZ6EB9-p6huexzDKZvvNDhecN6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

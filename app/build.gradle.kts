@@ -2,6 +2,7 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.jetbrains.kotlin.android)
   alias(libs.plugins.sqldelight)
+  alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -46,6 +47,7 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.material)
 
+  implementation(libs.firebase.config)
   implementation(libs.sqldelight.android.driver)
   api(libs.sqldelight.coroutines)
 }
