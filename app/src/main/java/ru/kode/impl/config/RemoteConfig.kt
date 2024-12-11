@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import ru.kode.plexus.Config
-import ru.kode.plexus.FeatureState
+import ru.kode.plexus.FeatureValue
 
 class RemoteConfig(onComplete: () -> Unit) : Config {
 
@@ -52,11 +52,11 @@ class RemoteConfig(onComplete: () -> Unit) : Config {
     }
   }
 
-  override fun getFeatureStateSync(key: String): FeatureState {
+  override fun getFeatureValueSync(key: String): FeatureValue {
     return remoteConfig[key].toFeatureState()
   }
 
-  override fun getFeatureState(key: String): Flow<FeatureState> {
+  override fun getFeatureValue(key: String): Flow<FeatureValue> {
     return merge(
       flow {
         emit(remoteConfig[key].toFeatureState())
@@ -68,7 +68,7 @@ class RemoteConfig(onComplete: () -> Unit) : Config {
     )
   }
 
-  override fun getFeaturesState(keys: List<String>): Flow<Map<String, FeatureState>> {
+  override fun getFeaturesValue(keys: List<String>): Flow<Map<String, FeatureValue>> {
     return merge(
       flow {
         emit(getFeatureStatesByKeys(keys))
@@ -79,16 +79,33 @@ class RemoteConfig(onComplete: () -> Unit) : Config {
     )
   }
 
-  private fun getFeatureStatesByKeys(keys: List<String>): Map<String, FeatureState> {
+  private fun getFeatureStatesByKeys(keys: List<String>): Map<String, FeatureValue> {
     return remoteConfig.all
       .filter { it.key in keys }
       .mapValues { it.value.toFeatureState() }
   }
 
-  private fun FirebaseRemoteConfigValue.toFeatureState(): FeatureState {
+  private fun FirebaseRemoteConfigValue.toFeatureState(): FeatureValue {
+    if (source != FirebaseRemoteConfig.VALUE_SOURCE_REMOTE) {
+      return FeatureValue.Undefined
+    }
     return when {
-      source != FirebaseRemoteConfig.VALUE_SOURCE_REMOTE -> FeatureState.Undefined
-      else -> if (asBoolean()) FeatureState.Enabled else FeatureState.Disabled
+      getOrNull { asBoolean() } != null -> FeatureValue.BooleanValue(asBoolean())
+      getOrNull { asLong() } != null -> FeatureValue.LongValue(asLong())
+      getOrNull { asDouble() } != null -> FeatureValue.DoubleValue(asDouble())
+      getOrNull { asString() } != null -> FeatureValue.StringValue(asString())
+      else -> FeatureValue.Undefined
+    }
+  }
+
+
+  private fun FirebaseRemoteConfigValue.getOrNull(
+    getter: FirebaseRemoteConfigValue.() -> Any?
+  ): Any? {
+    return try {
+      getter()
+    } catch (error: IllegalArgumentException) {
+      null
     }
   }
 }

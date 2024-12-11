@@ -2,43 +2,54 @@ package ru.kode.plexus
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import ru.kode.plexus.FeatureState.Disabled
-import ru.kode.plexus.FeatureState.Enabled
-import ru.kode.plexus.FeatureState.Undefined
+import kotlinx.coroutines.flow.map
+import ru.kode.impl.AppFeature
+import kotlin.reflect.cast
 
 class PlexusManager internal constructor(
-  private val configs: List<Config>
+  val configs: List<Config>,
 ) {
 
-  fun getFeatureValueSync(key: String): Boolean {
-    return configs.firstNotNullOfOrNull { it.getFeatureStateSync(key).toBooleanOrNull() } ?: false
+  inline fun <reified T : Any> getFeatureValueSync(appFeature: AppFeature<T>): T {
+    return configs.firstNotNullOfOrNull {
+      it.getFeatureValueSync(appFeature.key).toValueOrNull(appFeature)
+    } ?: throw FeatureNotDeclaredException("AppFeature $appFeature is not declared in more than one config")
   }
 
-  fun getFeatureValue(featureKey: String): Flow<Boolean> {
+  inline fun <reified T : Any> getFeatureValue(appFeature: AppFeature<T>): Flow<T> {
     val flows = configs.map { config ->
-      config.getFeatureState(featureKey)
+      config.getFeatureValue(appFeature.key)
     }
-    return combine(flows) { featureStates ->
-      featureStates.firstNotNullOfOrNull { it.toBooleanOrNull() } ?: false
+    return combine(flows) { featureValues ->
+      featureValues.firstNotNullOfOrNull { it.toValueOrNull(appFeature) }
+    }.map { result ->
+      result ?: throw FeatureNotDeclaredException("AppFeature $appFeature is not declared in more than one config")
     }
   }
 
-  fun getFeaturesValue(vararg featureKeys: String): Flow<Map<String, Boolean>> {
+  inline fun <reified T : Any> getFeaturesValue(vararg appFeatures: AppFeature<T>): Flow<Map<AppFeature<T>, T>> {
+    val keys = appFeatures.map { it.key }
     val flows = configs.map { config ->
-      config.getFeaturesState(featureKeys.toList())
+      config.getFeaturesValue(keys)
     }
-    return combine(flows) { result ->
-      featureKeys.associateWith { key ->
-        result.firstNotNullOfOrNull { it[key]?.toBooleanOrNull() } ?: false
+    return combine(flows) { featuresValues ->
+      appFeatures.associateWith { appFeature ->
+        featuresValues.firstNotNullOfOrNull { it[appFeature.key]?.toValueOrNull(appFeature) }
+      }
+    }.map {
+      it.mapValues { (appFeature, result) ->
+        result ?: throw FeatureNotDeclaredException("AppFeature $appFeature is not declared in more than one config")
       }
     }
   }
 
-  private fun FeatureState.toBooleanOrNull(): Boolean? {
+  inline fun <reified T : Any> FeatureValue.toValueOrNull(appFeature: AppFeature<T>): T? {
     return when (this) {
-      Enabled -> true
-      Disabled -> false
-      Undefined -> null
+      is FeatureValue.LongValue -> appFeature.type.cast(value)
+      is FeatureValue.DoubleValue -> appFeature.type.cast(value)
+      is FeatureValue.StringValue -> appFeature.type.cast(value)
+      is FeatureValue.BooleanValue -> appFeature.type.cast(value)
+      is FeatureValue.Undefined -> null
     }
   }
 }

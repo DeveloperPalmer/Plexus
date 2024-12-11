@@ -1,7 +1,28 @@
 package ru.kode.impl
 
-sealed class AppFeature(override val key: String): Feature {
-  data object MainFeature: AppFeature(key = "Main")
-  data object SecondaryFeature: AppFeature(key = "Secondary")
-  data object TertiaryFeature: AppFeature(key = "Tertiary")
+import kotlin.reflect.KClass
+
+sealed class AppFeature<out T : Any>(
+  val key: String,
+  val type: KClass<@UnsafeVariance T>
+) {
+  data object Name : AppFeature<String>(
+    key = "name_key",
+    type = String::class
+  )
+
+  data object IsRich : AppFeature<Boolean>(
+    key = "is_rich_key",
+    type = Boolean::class
+  )
+
+  data object Age : AppFeature<Long>(
+    key = "age_key",
+    type = Long::class
+  )
+
+  data object Money : AppFeature<Double>(
+    key = "money_key",
+    type = Double::class
+  )
 }

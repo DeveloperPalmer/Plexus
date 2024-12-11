@@ -4,24 +4,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import ru.kode.impl.AppFeature
 import ru.kode.plexus.Config
-import ru.kode.plexus.FeatureState
+import ru.kode.plexus.FeatureValue
 
 class LocalConfig: Config {
-  override fun getFeatureStateSync(key: String): FeatureState {
-    return features.getOrDefault(key, FeatureState.Undefined)
+  override fun getFeatureValueSync(key: String): FeatureValue {
+    return features.getOrDefault(key, FeatureValue.Undefined)
   }
 
-  override fun getFeatureState(key: String): Flow<FeatureState> {
-    return flowOf(features.getOrDefault(key, FeatureState.Undefined))
+  override fun getFeatureValue(key: String): Flow<FeatureValue> {
+    return flowOf(features.getOrDefault(key, FeatureValue.Undefined))
   }
 
-  override fun getFeaturesState(keys: List<String>): Flow<Map<String, FeatureState>> {
+  override fun getFeaturesValue(keys: List<String>): Flow<Map<String, FeatureValue>> {
     return flowOf(features.filter { it.key in keys })
   }
 
-  private val features: Map<String, FeatureState> = mapOf(
-    AppFeature.MainFeature.key to FeatureState.Enabled,
-    AppFeature.SecondaryFeature.key to FeatureState.Disabled,
-    AppFeature.TertiaryFeature.key to FeatureState.Enabled,
+  private val features: Map<String, FeatureValue> = mapOf(
+    AppFeature.Name.key to FeatureValue.StringValue("Aboba"),
+    AppFeature.IsRich.key to FeatureValue.BooleanValue(false),
+    AppFeature.Age.key to FeatureValue.LongValue(10L),
+    AppFeature.Money.key to FeatureValue.DoubleValue(10.99)
   )
 }
