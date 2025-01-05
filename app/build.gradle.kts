@@ -61,6 +61,8 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.material)
 
+  implementation(libs.plexus.core)
+
   implementation(libs.firebase.config)
   implementation(libs.sqldelight.android.driver)
   api(libs.sqldelight.coroutines)

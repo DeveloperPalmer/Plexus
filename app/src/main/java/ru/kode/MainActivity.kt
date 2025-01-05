@@ -2,7 +2,6 @@ package ru.kode
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -21,100 +19,15 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import ru.kode.impl.AppFeature
 import ru.kode.impl.DebugItem
-import ru.kode.impl.config.DebugConfig
-import ru.kode.impl.config.LocalConfig
-import ru.kode.impl.config.RemoteConfig
-import ru.kode.plexus.PlexusBuilder
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
-    setContent {
-      val scope = rememberCoroutineScope()
-      val debugConfig = remember { DebugConfig(applicationContext) }
-      var debugFeatures by remember { mutableStateOf<List<DebugItem>>(emptyList()) }
-
-      val plexusManager = remember {
-        PlexusBuilder()
-          .addConfig(debugConfig)
-          .addConfig(RemoteConfig {})
-          .addConfig(LocalConfig())
-          .build()
-      }
-
-      LaunchedEffect(Unit) {
-        plexusManager.getFeaturesValue(
-          listOf(
-            AppFeature.Name.key,
-            AppFeature.IsRich.key,
-            AppFeature.Age.key,
-            AppFeature.Money.key,
-          )
-        ).onEach { features ->
-          debugFeatures = features.map { (feature, value) -> feature.toUiModel(value) }
-        }.launchIn(scope)
-      }
-
-      Column(
-        modifier = Modifier
-          .systemBarsPadding()
-          .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-      ) {
-        debugFeatures.forEach { item ->
-          when (item) {
-            is DebugItem.DoubleValue -> {
-              DoubleItem(
-                name = item.key,
-                currentValue = item.value,
-                values = remember { listOf(25.0, 50.0, 75.0, 100.0) },
-                onValueChange = { debugConfig.setFeatureValue(item.key, it.toString()) }
-              )
-            }
-
-            is DebugItem.LongValue -> {
-              LongItem(
-                name = item.key,
-                currentValue = item.value,
-                values = remember { listOf(25L, 50L, 75L, 100L) },
-                onValueChange = { debugConfig.setFeatureValue(item.key, it.toString()) }
-              )
-            }
-
-            is DebugItem.BooleanValue -> {
-              BooleanItem(
-                name = item.key,
-                checked = item.value,
-                onCheckedChange = { debugConfig.setFeatureValue(item.key, it.toString()) }
-              )
-            }
-
-            is DebugItem.StringValue -> {
-              var temp by remember(item.value) { mutableStateOf(item.value) }
-              StringItem(
-                name = item.key,
-                value = temp,
-                onApply = { debugConfig.setFeatureValue(item.key, temp) },
-                onValueChange = { temp = it }
-              )
-            }
-          }
-        }
-      }
-    }
   }
 
 

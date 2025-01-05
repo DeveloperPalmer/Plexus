@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Plexus"
 include(":app")
- 
+include(":core")

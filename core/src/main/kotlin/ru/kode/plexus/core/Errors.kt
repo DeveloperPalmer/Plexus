@@ -1,4 +1,4 @@
-package ru.kode.plexus
+package ru.kode.plexus.core
 
 class FeatureNotDeclaredException(
   override val message: String?,
