@@ -36,6 +36,7 @@ import ru.kode.config.LocalConfig
 import ru.kode.config.FirebaseConfig
 import ru.kode.plexus.core.FeatureConfigsBuilder
 
+
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
